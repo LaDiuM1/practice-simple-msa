@@ -14,3 +14,9 @@
         url: jdbc:postgresql://localhost:5432/postgres
         username: ${DB_LOGIN_ID}
         password: ${DB_LOGIN_PASSWORD}
+
+jwt:
+  private-key: ${JWT_SECRET_KEY}
+  public-key: ${JWT_PUBLIC_KEY}
+  access-expired-time: 30m
+  refresh-expired-time: 14d
