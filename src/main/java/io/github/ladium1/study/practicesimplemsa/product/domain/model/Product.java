@@ -1,5 +1,6 @@
 package io.github.ladium1.study.practicesimplemsa.product.domain.model;
 
+import io.github.ladium1.study.practicesimplemsa.product.domain.exception.ProductOutOfStockException;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -49,6 +50,23 @@ public class Product {
         if (price != null) { this.price = price; }
         if (stockQuantity != null) { this.stockQuantity = stockQuantity; }
         if (status != null) { this.status = status; }
+    }
+
+    public void decreaseStock(int quantity) {
+        if (this.stockQuantity == null || this.stockQuantity < quantity) {
+            throw new ProductOutOfStockException(this.id);
+        }
+        this.stockQuantity -= quantity;
+        if (this.stockQuantity == 0) {
+            this.status = ProductStatus.SOLD_OUT;
+        }
+    }
+
+    public void restoreStock(int quantity) {
+        this.stockQuantity = (this.stockQuantity == null ? quantity : this.stockQuantity + quantity);
+        if (this.status == ProductStatus.SOLD_OUT && this.stockQuantity > 0) {
+            this.status = ProductStatus.FOR_SALE;
+        }
     }
 
     @PrePersist

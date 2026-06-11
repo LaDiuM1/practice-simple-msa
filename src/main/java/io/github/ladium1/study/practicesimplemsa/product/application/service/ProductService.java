@@ -55,4 +55,18 @@ public class ProductService implements ProductUseCase {
         Product deleteProduct = productRepository.getById(productId);
         productRepository.delete(deleteProduct);
     }
+
+    @Override
+    @Transactional
+    public void decreaseStock(UUID productId, int quantity) {
+        Product product = productRepository.getById(productId);
+        product.decreaseStock(quantity);
+    }
+
+    @Override
+    @Transactional
+    public void restoreStock(UUID productId, int quantity) {
+        Product product = productRepository.getById(productId);
+        product.restoreStock(quantity);
+    }
 }

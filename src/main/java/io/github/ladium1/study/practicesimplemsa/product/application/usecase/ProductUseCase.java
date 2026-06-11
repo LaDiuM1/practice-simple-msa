@@ -15,4 +15,8 @@ public interface ProductUseCase {
     ProductInfo update(ProductUpdateCommand command);
 
     void delete(UUID productId);
+
+    void decreaseStock(UUID productId, int quantity);
+
+    void restoreStock(UUID productId, int quantity);
 }
