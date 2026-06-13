@@ -1,19 +1,19 @@
-  server:
-    port: 8090
+server:
+  port: 8090
 
-  spring:
-    config:
-      import: optional:file:.env[.properties]
-    application:
-      name: practice-simple-msa
-    jpa:
-      hibernate:
-        ddl-auto: update
-      database: postgresql
-    datasource:
-        url: jdbc:postgresql://localhost:5432/postgres
-        username: ${DB_LOGIN_ID}
-        password: ${DB_LOGIN_PASSWORD}
+spring:
+  config:
+    import: optional:file:.env[.properties]
+  application:
+    name: practice-simple-msa
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database: postgresql
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: ${DB_LOGIN_ID}
+    password: ${DB_LOGIN_PASSWORD}
 
 jwt:
   private-key: ${JWT_SECRET_KEY}
