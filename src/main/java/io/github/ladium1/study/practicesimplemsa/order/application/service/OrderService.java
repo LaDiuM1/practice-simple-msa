@@ -1,12 +1,12 @@
 package io.github.ladium1.study.practicesimplemsa.order.application.service;
 
+import io.github.ladium1.study.practicesimplemsa.order.application.client.ProductClient;
+import io.github.ladium1.study.practicesimplemsa.order.application.client.ProductSnapshot;
 import io.github.ladium1.study.practicesimplemsa.order.application.dto.OrderCreateCommand;
 import io.github.ladium1.study.practicesimplemsa.order.application.dto.OrderInfo;
 import io.github.ladium1.study.practicesimplemsa.order.application.usecase.OrderUseCase;
 import io.github.ladium1.study.practicesimplemsa.order.domain.model.Order;
 import io.github.ladium1.study.practicesimplemsa.order.domain.repository.OrderRepository;
-import io.github.ladium1.study.practicesimplemsa.product.application.dto.ProductInfo;
-import io.github.ladium1.study.practicesimplemsa.product.application.usecase.ProductUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +19,7 @@ import java.util.UUID;
 public class OrderService implements OrderUseCase {
 
     private final OrderRepository orderRepository;
-    private final ProductUseCase productUseCase;
+    private final ProductClient productClient;
 
     @Override
     public OrderInfo get(UUID orderId) {
@@ -30,8 +30,8 @@ public class OrderService implements OrderUseCase {
     @Override
     @Transactional
     public OrderInfo create(OrderCreateCommand command) {
-        ProductInfo product = productUseCase.get(command.productId());
-        productUseCase.decreaseStock(command.productId(), command.quantity());
+        ProductSnapshot product = productClient.getProduct(command.productId());
+        productClient.decreaseStock(command.productId(), command.quantity());
 
         Order newOrder = new Order(
                 command.productId(),
@@ -48,7 +48,7 @@ public class OrderService implements OrderUseCase {
     public OrderInfo cancel(UUID orderId) {
         Order order = orderRepository.getById(orderId);
         order.cancel();
-        productUseCase.restoreStock(order.getProductId(), order.getQuantity());
+        productClient.restoreStock(order.getProductId(), order.getQuantity());
         return OrderInfo.from(order);
     }
 }
