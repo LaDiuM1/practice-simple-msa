@@ -16,5 +16,11 @@ services:
       timeout: 5s
       retries: 10
 
+  kafka:
+    image: apache/kafka:3.9.1
+    container_name: practice-msa-kafka
+    ports:
+      - "9092:9092"
+
 volumes:
   postgres-data:

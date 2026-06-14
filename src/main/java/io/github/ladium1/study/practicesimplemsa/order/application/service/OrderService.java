@@ -4,6 +4,9 @@ import io.github.ladium1.study.practicesimplemsa.order.application.client.Produc
 import io.github.ladium1.study.practicesimplemsa.order.application.client.ProductSnapshot;
 import io.github.ladium1.study.practicesimplemsa.order.application.dto.OrderCreateCommand;
 import io.github.ladium1.study.practicesimplemsa.order.application.dto.OrderInfo;
+import io.github.ladium1.study.practicesimplemsa.order.application.event.OrderCanceledEvent;
+import io.github.ladium1.study.practicesimplemsa.order.application.event.OrderCreatedEvent;
+import io.github.ladium1.study.practicesimplemsa.order.application.event.OrderEventPublisher;
 import io.github.ladium1.study.practicesimplemsa.order.application.usecase.OrderUseCase;
 import io.github.ladium1.study.practicesimplemsa.order.domain.model.Order;
 import io.github.ladium1.study.practicesimplemsa.order.domain.repository.OrderRepository;
@@ -20,6 +23,7 @@ public class OrderService implements OrderUseCase {
 
     private final OrderRepository orderRepository;
     private final ProductClient productClient;
+    private final OrderEventPublisher orderEventPublisher;
 
     @Override
     public OrderInfo get(UUID orderId) {
@@ -31,7 +35,6 @@ public class OrderService implements OrderUseCase {
     @Transactional
     public OrderInfo create(OrderCreateCommand command) {
         ProductSnapshot product = productClient.getProduct(command.productId());
-        productClient.decreaseStock(command.productId(), command.quantity());
 
         Order newOrder = new Order(
                 command.productId(),
@@ -40,6 +43,7 @@ public class OrderService implements OrderUseCase {
                 product.price() * command.quantity()
         );
         Order createdOrder = orderRepository.save(newOrder);
+        orderEventPublisher.publishCreated(OrderCreatedEvent.from(createdOrder));
         return OrderInfo.from(createdOrder);
     }
 
@@ -48,7 +52,7 @@ public class OrderService implements OrderUseCase {
     public OrderInfo cancel(UUID orderId) {
         Order order = orderRepository.getById(orderId);
         order.cancel();
-        productClient.restoreStock(order.getProductId(), order.getQuantity());
+        orderEventPublisher.publishCanceled(OrderCanceledEvent.from(order));
         return OrderInfo.from(order);
     }
 }
