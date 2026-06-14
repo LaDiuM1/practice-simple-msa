@@ -14,6 +14,11 @@ spring:
     url: jdbc:postgresql://localhost:5432/postgres
     username: ${DB_LOGIN_ID}
     password: ${DB_LOGIN_PASSWORD}
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: practice-simple-msa
+      auto-offset-reset: earliest
 
 jwt:
   private-key: ${JWT_SECRET_KEY}
