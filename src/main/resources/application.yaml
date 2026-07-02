@@ -14,6 +14,10 @@ spring:
     url: jdbc:postgresql://localhost:5432/postgres
     username: ${DB_LOGIN_ID}
     password: ${DB_LOGIN_PASSWORD}
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
   kafka:
     bootstrap-servers: localhost:9092
     consumer:
@@ -28,6 +32,10 @@ openai:
   embedding:
     enabled: true
     model: text-embedding-3-small
+  image-analysis:
+    model: gpt-5.4-nano
+  image:
+    model: gpt-image-1-mini
 
 jwt:
   private-key: ${JWT_SECRET_KEY}
