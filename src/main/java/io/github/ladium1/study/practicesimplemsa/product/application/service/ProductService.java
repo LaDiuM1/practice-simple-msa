@@ -2,7 +2,9 @@ package io.github.ladium1.study.practicesimplemsa.product.application.service;
 
 import io.github.ladium1.study.practicesimplemsa.product.application.dto.ProductCreateCommand;
 import io.github.ladium1.study.practicesimplemsa.product.application.dto.ProductInfo;
+import io.github.ladium1.study.practicesimplemsa.product.application.dto.ProductLlmSearchInfo;
 import io.github.ladium1.study.practicesimplemsa.product.application.dto.ProductUpdateCommand;
+import io.github.ladium1.study.practicesimplemsa.product.application.llm.ProductLlmAnswerGenerator;
 import io.github.ladium1.study.practicesimplemsa.product.application.search.ProductLexicalSearcher;
 import io.github.ladium1.study.practicesimplemsa.product.application.usecase.ProductUseCase;
 import io.github.ladium1.study.practicesimplemsa.product.application.vector.ProductEmbeddingService;
@@ -26,6 +28,7 @@ public class ProductService implements ProductUseCase {
     private final ProductRepository productRepository;
     private final ProductEmbeddingService productEmbeddingService;
     private final ProductLexicalSearcher productLexicalSearcher;
+    private final ProductLlmAnswerGenerator productLlmAnswerGenerator;
 
     @Override
     public ProductInfo get(UUID productId) {
@@ -82,23 +85,44 @@ public class ProductService implements ProductUseCase {
 
     @Override
     public List<ProductInfo> semanticSearch(String query, int size) {
-        int limit = size <= 0 ? DEFAULT_SEARCH_SIZE : size;
-        Optional<float[]> queryEmbedding = productEmbeddingService.embed(query);
+        return toInfos(searchProducts(query, size));
+    }
 
-        if (queryEmbedding.isPresent()) {
-            List<Product> nearestProducts = productRepository.findNearestProducts(queryEmbedding.get(), limit);
-            if (!nearestProducts.isEmpty()) {
-                return toInfos(nearestProducts);
-            }
+    @Override
+    public ProductLlmSearchInfo llmSearch(String question, int size) {
+        List<Product> products = searchProducts(question, size);
+        String answer = productLlmAnswerGenerator.generateAnswer(question, products);
+        if (answer == null || answer.isBlank()) {
+            answer = fallbackAnswer(products);
         }
-
-        return toInfos(productLexicalSearcher.search(query, limit));
+        return ProductLlmSearchInfo.of(question, answer, toInfos(products));
     }
 
     @Override
     @Transactional
     public int refreshEmbeddings() {
         return productEmbeddingService.refreshEmbeddings();
+    }
+
+    private List<Product> searchProducts(String query, int size) {
+        int limit = size <= 0 ? DEFAULT_SEARCH_SIZE : size;
+        Optional<float[]> queryEmbedding = productEmbeddingService.embed(query);
+
+        if (queryEmbedding.isPresent()) {
+            List<Product> nearestProducts = productRepository.findNearestProducts(queryEmbedding.get(), limit);
+            if (!nearestProducts.isEmpty()) {
+                return nearestProducts;
+            }
+        }
+
+        return productLexicalSearcher.search(query, limit);
+    }
+
+    private String fallbackAnswer(List<Product> products) {
+        if (products.isEmpty()) {
+            return "관련 상품을 찾지 못했습니다.";
+        }
+        return "검색된 상품을 기준으로 추천했습니다. 아래 목록을 확인해 주세요.";
     }
 
     private List<ProductInfo> toInfos(List<Product> products) {

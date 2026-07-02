@@ -2,6 +2,7 @@ package io.github.ladium1.study.practicesimplemsa.product.application.usecase;
 
 import io.github.ladium1.study.practicesimplemsa.product.application.dto.ProductCreateCommand;
 import io.github.ladium1.study.practicesimplemsa.product.application.dto.ProductInfo;
+import io.github.ladium1.study.practicesimplemsa.product.application.dto.ProductLlmSearchInfo;
 import io.github.ladium1.study.practicesimplemsa.product.application.dto.ProductUpdateCommand;
 
 import java.util.List;
@@ -22,6 +23,8 @@ public interface ProductUseCase {
     void restoreStock(UUID productId, int quantity);
 
     List<ProductInfo> semanticSearch(String query, int size);
+
+    ProductLlmSearchInfo llmSearch(String question, int size);
 
     int refreshEmbeddings();
 }

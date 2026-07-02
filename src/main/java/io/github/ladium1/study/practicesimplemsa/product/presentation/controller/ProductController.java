@@ -1,8 +1,10 @@
 package io.github.ladium1.study.practicesimplemsa.product.presentation.controller;
 
 import io.github.ladium1.study.practicesimplemsa.product.application.dto.ProductInfo;
+import io.github.ladium1.study.practicesimplemsa.product.application.dto.ProductLlmSearchInfo;
 import io.github.ladium1.study.practicesimplemsa.product.application.usecase.ProductUseCase;
 import io.github.ladium1.study.practicesimplemsa.product.presentation.dto.ProductCreateRequest;
+import io.github.ladium1.study.practicesimplemsa.product.presentation.dto.ProductLlmSearchRequest;
 import io.github.ladium1.study.practicesimplemsa.product.presentation.dto.ProductUpdateRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -57,6 +59,13 @@ public class ProductController {
                                                             @RequestParam(defaultValue = "5") int size) {
         List<ProductInfo> productInfos = productUseCase.semanticSearch(query, size);
         return ResponseEntity.ok(productInfos);
+    }
+
+    @Operation(summary = "상품 LLM 검색", description = "유사 상품 벡터 검색 후 검색 결과 기반 LLM 답변 생성")
+    @PostMapping("/llm-search")
+    public ResponseEntity<ProductLlmSearchInfo> llmSearch(@Valid @RequestBody ProductLlmSearchRequest request) {
+        ProductLlmSearchInfo searchInfo = productUseCase.llmSearch(request.question(), request.sizeOrDefault());
+        return ResponseEntity.ok(searchInfo);
     }
 
     @Operation(summary = "상품 임베딩 재생성", description = "전체 상품에 대한 임베딩 재실행 후 업데이트 상품 수 반환")
