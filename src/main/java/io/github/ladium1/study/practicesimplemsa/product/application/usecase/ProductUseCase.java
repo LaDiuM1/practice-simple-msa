@@ -4,6 +4,7 @@ import io.github.ladium1.study.practicesimplemsa.product.application.dto.Product
 import io.github.ladium1.study.practicesimplemsa.product.application.dto.ProductInfo;
 import io.github.ladium1.study.practicesimplemsa.product.application.dto.ProductUpdateCommand;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface ProductUseCase {
@@ -19,4 +20,8 @@ public interface ProductUseCase {
     void decreaseStock(UUID productId, int quantity);
 
     void restoreStock(UUID productId, int quantity);
+
+    List<ProductInfo> semanticSearch(String query, int size);
+
+    int refreshEmbeddings();
 }

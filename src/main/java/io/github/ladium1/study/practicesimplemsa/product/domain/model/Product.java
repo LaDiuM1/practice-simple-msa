@@ -6,6 +6,9 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Array;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -31,6 +34,11 @@ public class Product {
     private ProductStatus status;
     @Column(comment = "판매자 id")
     private UUID sellerId;
+    @Schema(hidden = true)
+    @JdbcTypeCode(SqlTypes.VECTOR)
+    @Array(length = 1536)
+    @Column(comment = "상품 임베딩")
+    private float[] embedding;
     @Column(comment = "생성일시")
     private LocalDateTime createdAt;
     @Column(comment = "수정일시")
@@ -40,6 +48,10 @@ public class Product {
         this.name = name;
         this.price = price;
         this.sellerId = sellerId;
+    }
+
+    public void updateEmbedding(float[] embedding) {
+        this.embedding = embedding;
     }
 
     public void update(String name,

@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -48,6 +49,21 @@ public class ProductController {
     public ResponseEntity<Void> delete(@PathVariable UUID productId) {
         productUseCase.delete(productId);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "상품 의미 검색", description = "상품명 임베딩 기준 검색어와 가장 유사한 상품 조회")
+    @GetMapping("/semantic-search")
+    public ResponseEntity<List<ProductInfo>> semanticSearch(@RequestParam String query,
+                                                            @RequestParam(defaultValue = "5") int size) {
+        List<ProductInfo> productInfos = productUseCase.semanticSearch(query, size);
+        return ResponseEntity.ok(productInfos);
+    }
+
+    @Operation(summary = "상품 임베딩 재생성", description = "전체 상품에 대한 임베딩 재실행 후 업데이트 상품 수 반환")
+    @PostMapping("/embeddings/refresh")
+    public ResponseEntity<Integer> refreshEmbeddings() {
+        int updatedCount = productUseCase.refreshEmbeddings();
+        return ResponseEntity.ok(updatedCount);
     }
 
 }
